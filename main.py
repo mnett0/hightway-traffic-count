@@ -20,7 +20,6 @@ LABELS = []
 g = Counter('vehicles_count', 'Number of vehicles', ["location", "type"])
 current_location = "Viaduc_de_Millau"
 
-
 with open(classesFile, 'rt') as f:
     LABELS = f.read().rstrip('\n').split('\n')
 
@@ -234,6 +233,7 @@ num_frames, vehicle_count = 0, 0
 # writer = initializeVideoWriter(video_width, video_height, videoStream)
 start_time = int(time.time())
 # loop over frames from the video file stream
+i = 0
 while True:
     # print("================NEW FRAME================")
     # num_frames += 1
