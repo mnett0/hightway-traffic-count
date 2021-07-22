@@ -22,16 +22,20 @@ with open(classesFile, 'rt') as f:
 weightsPath = 'yolov3.weights'
 configPath = 'yolov3.cfg'
 
-""" #YOUTUBE LIVE
-url = 'https://www.youtube.com/watch?v=U7Gxu3DYOxg'
+# Tokyo Shinjuku Live Cam : https://www.youtube.com/watch?v=RQA5RcIZlAM
+#
+### YOUTUBE LIVE VIDEO ###
+url = 'https://www.youtube.com/watch?v=zIPKVojgh4E'
 video = pafy.new(url)
 best = video.getbest(preftype="mp4")
 inputVideoPath = best.url
-"""
-inputVideoPath = 'https://deliverys3.joada.net/contents/encodings/live/f154fbd1-742e-4ed5-3335-3130-6d61-63-be54' \
-                 '-7f8d574cdffed/mpd.mpd'
+
+
+# inputVideoPath = 'https://deliverys3.joada.net/contents/encodings/live/f154fbd1-742e-4ed5-3335-3130-6d61-63-be54' \
+#                 '-7f8d574cdffed/mpd.mpd'
+
 outputVideoPath = ''
-preDefinedConfidence = 0.6
+preDefinedConfidence = 0.5
 preDefinedThreshold = 0.3
 
 # Initialize a list of colors to represent each possible class label
@@ -46,11 +50,11 @@ COLORS = np.random.randint(0, 255, size=(len(LABELS), 3),
 def displayVehicleCount(frame, vehicle_count):
     cv2.putText(
         frame,  # Image
-        'Detected Vehicles: ' + str(vehicle_count),  # Label
+        'Vehicules: ' + str(vehicle_count),  # Label
         (20, 20),  # Position
         cv2.FONT_HERSHEY_SIMPLEX,  # Font
         0.8,  # Size
-        (0, 0xFF, 0),  # Color
+        (128, 128, 128),  # Color
         2,  # Thickness
         cv2.FONT_HERSHEY_COMPLEX_SMALL,
     )
@@ -192,6 +196,8 @@ def count_vehicles(idxs, boxes, classIDs, vehicle_count, previous_frame_detectio
 # and determine only the *output* layer names that we need from YOLO
 print("[INFO] loading YOLO from disk...")
 net = cv2.dnn.readNetFromDarknet(configPath, weightsPath)
+net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
+net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
 ln = net.getLayerNames()
 ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
@@ -218,9 +224,10 @@ num_frames, vehicle_count = 0, 0
 start_time = int(time.time())
 # loop over frames from the video file stream
 while True:
-    print("================NEW FRAME================")
-    num_frames += 1
-    print("FRAME:\t", num_frames)
+    # print("================NEW FRAME================")
+    # num_frames += 1
+    # print("FRAME:\t", num_frames)
+
     # Initialization for each iteration
     boxes, confidences, classIDs = [], [], []
     vehicle_crossed_line_flag = False
