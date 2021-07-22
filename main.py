@@ -6,6 +6,7 @@ from scipy import spatial
 import cv2
 import pafy
 import youtube_dl
+from prometheus_client import start_http_server, Gauge, Counter
 
 # Setting the threshold for the number of frames to search a vehicle for
 FRAMES_BEFORE_CURRENT = 10
@@ -16,23 +17,28 @@ classesFile = 'coco.names'
 list_of_vehicles = ["bicycle", "car", "motorbike", "bus", "truck", "train"]
 LABELS = []
 
+g = Counter('vehicles_count', 'Number of vehicles', ["location", "type"])
+current_location = "Viaduc_de_Millau"
+
+
 with open(classesFile, 'rt') as f:
     LABELS = f.read().rstrip('\n').split('\n')
 
-weightsPath = 'yolov3.weights'
-configPath = 'yolov3.cfg'
+weightsPath = 'yolov4.weights'
+configPath = 'yolov4.cfg'
 
+"""
 # Tokyo Shinjuku Live Cam : https://www.youtube.com/watch?v=RQA5RcIZlAM
 #
 ### YOUTUBE LIVE VIDEO ###
-url = 'https://www.youtube.com/watch?v=zIPKVojgh4E'
+url = 'https://www.youtube.com/watch?v=RQA5RcIZlAM'
 video = pafy.new(url)
 best = video.getbest(preftype="mp4")
 inputVideoPath = best.url
+"""
 
-
-# inputVideoPath = 'https://deliverys3.joada.net/contents/encodings/live/f154fbd1-742e-4ed5-3335-3130-6d61-63-be54' \
-#                 '-7f8d574cdffed/mpd.mpd'
+inputVideoPath = 'https://deliverys3.joada.net/contents/encodings/live/f154fbd1-742e-4ed5-3335-3130-6d61-63-be54' \
+                 '-7f8d574cdffed/mpd.mpd'
 
 outputVideoPath = ''
 preDefinedConfidence = 0.5
@@ -81,7 +87,7 @@ def boxAndLineOverlap(x_mid_point, y_mid_point, line_coordinates):
 def displayFPS(frame, start_time, num_frames):
     current_time = int(time.time())
     if current_time > start_time:
-        #os.system('clear')  # Equivalent of CTRL+L on the terminal
+        # os.system('clear')  # Equivalent of CTRL+L on the terminal
         # print("FPS:", num_frames)
         # putting the FPS count on the frame
         cv2.putText(frame, str(num_frames), (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (100, 255, 0), 2)
@@ -173,6 +179,8 @@ def count_vehicles(idxs, boxes, classIDs, vehicle_count, previous_frame_detectio
                 current_detections[(centerX, centerY)] = vehicle_count
                 if (not boxInPreviousFrames(previous_frame_detections, (centerX, centerY, w, h), current_detections)):
                     vehicle_count += 1
+                    g.labels(location=current_location, type=LABELS[classIDs[i]]).inc()
+
                 # vehicle_crossed_line_flag += True
                 # else: #ID assigning
                 # Add the current detection mid-point of box to the list of detected items
@@ -184,13 +192,16 @@ def count_vehicles(idxs, boxes, classIDs, vehicle_count, previous_frame_detectio
                 if (list(current_detections.values()).count(ID) > 1):
                     current_detections[(centerX, centerY)] = vehicle_count
                     vehicle_count += 1
+                    g.labels(location=current_location, type=LABELS[classIDs[i]]).inc()
 
                 # Display the ID at the center of the box
-                cv2.putText(frame, str(ID), (centerX, centerY), \
+                cv2.putText(frame, str(ID), (centerX, centerY),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, [0, 0, 255], 2)
 
     return vehicle_count, current_detections
 
+
+start_http_server(8000)
 
 # load our YOLO object detector trained on COCO dataset (80 classes)
 # and determine only the *output* layer names that we need from YOLO
@@ -236,7 +247,6 @@ while True:
 
     # read the next frame from the file
     (grabbed, frame) = videoStream.read()
-
     start_time, num_frames = displayFPS(frame, start_time, num_frames)
     # if the frame was not grabbed, then we have reached the end of the stream
     if not grabbed:

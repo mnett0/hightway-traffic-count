@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+- job_name: app
+  static_configs:
+  - targets: ['localhost:8000']
+
+remote_write:
+  - url: "https://prometheus-blocks-prod-us-central1.grafana.net/api/prom/push"
+    basic_auth:
+      username: "164369"
+      password: "eyJrIjoiYTM2YzAwY2U4NzM3OTFiNTNkNzIzOWQxNWFiNDc2YmFiMWY3OTY4NSIsIm4iOiJ0ZXN0dHQiLCJpZCI6NTIyODk2fQ=="

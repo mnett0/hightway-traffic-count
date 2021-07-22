@@ -359,4 +359,4 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/intellij,python,opencv,macos,windows,linux,visualstudiocode,git
 
 yolov3*
-
+yolov4*
