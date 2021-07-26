@@ -23,8 +23,8 @@ current_location = "Viaduc_de_Millau"
 with open(classesFile, 'rt') as f:
     LABELS = f.read().rstrip('\n').split('\n')
 
-weightsPath = 'yolov4.weights'
-configPath = 'yolov4.cfg'
+weightsPath = 'yolov3.weights'
+configPath = 'yolov3.cfg'
 
 """
 # Tokyo Shinjuku Live Cam : https://www.youtube.com/watch?v=RQA5RcIZlAM
